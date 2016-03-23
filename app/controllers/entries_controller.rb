@@ -78,18 +78,37 @@ class EntriesController < ApplicationController
 
   def content
     @user = current_user
-    @entry = Entry.find params[:id]
+    @entry = Entry.find(params[:id])
+    @view_inline = params[:content_view] == 'true'
+    @user.update_view_setting(@view_inline, @entry.feed_id)
 
-    @content_view = params[:content_view] == 'true'
-
-    if @user.setting_on?(:sticky_view_inline)
-      subscription = Subscription.where(user: @user, feed_id: @entry.feed_id).first
-      if subscription.present?
-        subscription.update_attributes(view_inline: @content_view)
-      end
+    url = @entry.fully_qualified_url
+    if @entry.reddit?
+      @content = RedditParser.new(url).content
+    else
+      @content_info = ReadabilityParser.parse(url)
+      @content = @content_info.content
     end
 
-    view_inline
+    begin
+      if @view_inline
+        url = @entry.fully_qualified_url
+        if @entry.reddit?
+          @content = RedditParser.new(url).content
+        else
+          @content_info = ReadabilityParser.parse(url)
+          @content = @content_info.content
+        end
+        # @content_info = Rails.cache.fetch("content_view:#{Digest::SHA1.hexdigest(url)}:v2") do
+        #   ReadabilityParser.parse(url)
+        # end
+        Librato.increment 'readability.parse'
+      else
+        @content = @entry.content
+      end
+    rescue => e
+      @content = check_for_image(@entry, url)
+    end
 
     begin
       @content = ContentFormatter.format!(@content, @entry, !@user.setting_on?(:disable_image_proxy))
@@ -312,24 +331,6 @@ class EntriesController < ApplicationController
       end
     end
     services
-  end
-
-  def view_inline
-    begin
-      if @content_view
-        url = @entry.fully_qualified_url
-        @content_info = Rails.cache.fetch("content_view:#{Digest::SHA1.hexdigest(url)}:v2") do
-          ReadabilityParser.parse(url)
-        end
-        @content = @content_info.content
-        Librato.increment 'readability.parse'
-      else
-        @content = @entry.content
-      end
-    rescue => e
-      @content = check_for_image(@entry, url)
-    end
-
   end
 
   def matched_search_ids(params)

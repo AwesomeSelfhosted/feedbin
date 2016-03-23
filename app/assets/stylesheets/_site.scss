@@ -3430,6 +3430,19 @@ $saved-search-control-height: 48px;
         margin: 0 0 1.1em 0;
     }
 
+    ul {
+        p {
+            margin-bottom: .5em;
+        }
+        list-style-type: none;
+        padding-left: 0;
+        ul {
+            padding-left: 10px;
+            border-left: 1px solid transparent;
+            @include border-color($border-color, $border-color-night, $border-color-sunset);
+        }
+    }
+
     blockquote[align="center"] {
         text-align: left;
     }

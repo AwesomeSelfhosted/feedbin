@@ -331,4 +331,13 @@ class User < ActiveRecord::Base
     "https://manage.stripe.com/customers/#{customer_id}"
   end
 
+  def update_view_setting(view_inline, feed_id)
+    if setting_on?(:sticky_view_inline)
+      subscription = subscriptions.where(feed_id: feed_id).take
+      if subscription.present?
+        subscription.update_attributes(view_inline: view_inline)
+      end
+    end
+  end
+
 end

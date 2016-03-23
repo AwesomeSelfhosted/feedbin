@@ -1,0 +1,13 @@
+<% present reddit_comment do |reddit_comment_presenter| %>
+<ul>
+  <li>
+    <p><a href="<%= reddit_comment_presenter.author_link %>"><%= reddit_comment_presenter.author %></a></p>
+    <p><%= reddit_comment_presenter.content %></p>
+  </li>
+  <% reddit_comment.data["replies"] && reddit_comment.data["replies"]["data"] && reddit_comment.data["replies"]["data"]["children"] && reddit_comment.data["replies"]["data"]["children"].each do |child| %>
+    <% if child.dig("kind") == "t1" %>
+      <%= render partial: "entries/reddit/comment", locals: {reddit_comment: RedditComment.new(child["data"])} %>
+    <% end %>
+  <% end %>
+</ul>
+<% end %>

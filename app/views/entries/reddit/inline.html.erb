@@ -1,0 +1,9 @@
+<% data.each do |item| %>
+  <% item.dig("data", "children") && item.dig("data", "children").each do |child| %>
+    <% if child.dig("kind") == "t3" %>
+      <%= render partial: "entries/reddit/link", locals: {reddit_link: RedditLink.new(child["data"])} %>
+    <% elsif child.dig("kind") == "t1" %>
+      <%= render partial: "entries/reddit/comment", locals: {reddit_comment: RedditComment.new(child["data"])} %>
+    <% end %>
+  <% end %>
+<% end %>

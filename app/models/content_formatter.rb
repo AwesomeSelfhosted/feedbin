@@ -157,6 +157,16 @@ class ContentFormatter
         /x,
         /^
           (?:https?:\/\/|\/\/)
+          (?:i\.)?
+          (?:embed\.ly)
+        /x,
+        /^
+          (?:https?:\/\/|\/\/)
+          (?:cdn\.)?
+          (?:embedly\.com)
+        /x,
+        /^
+          (?:https?:\/\/|\/\/)
           (?:www\.flickr\.com)
         /x,
         /^

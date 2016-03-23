@@ -270,6 +270,14 @@ class Entry < ActiveRecord::Base
     self.data && self.data["format"] || "default"
   end
 
+  def reddit?
+    if url =~ /https:\/\/www\.reddit\.com\/r\/.*?\/comments\/.*?\/.*?\//
+      true
+    else
+      false
+    end
+  end
+
   private
 
   def base_url
