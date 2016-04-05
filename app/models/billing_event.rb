@@ -10,6 +10,7 @@ class BillingEvent < ActiveRecord::Base
   def build_event
     self.event_type = details.type
     self.event_id = details.id
+    self.stripe_object_id = details.data.object.id
 
     if details.data.object['customer'].present?
       customer = details.data.object.customer

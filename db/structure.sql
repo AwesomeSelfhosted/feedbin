@@ -112,7 +112,8 @@ CREATE TABLE billing_events (
     billable_type character varying(255),
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
-    event_id character varying(255)
+    event_id character varying(255),
+    stripe_object_id text
 );
 
 
@@ -1361,6 +1362,13 @@ CREATE UNIQUE INDEX index_billing_events_on_event_id ON billing_events USING btr
 
 
 --
+-- Name: index_billing_events_on_stripe_object_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_billing_events_on_stripe_object_id ON billing_events USING btree (stripe_object_id);
+
+
+--
 -- Name: index_coupons_on_user_id; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -2047,4 +2055,6 @@ INSERT INTO schema_migrations (version) VALUES ('20151110044837');
 INSERT INTO schema_migrations (version) VALUES ('20151207224028');
 
 INSERT INTO schema_migrations (version) VALUES ('20160126003712');
+
+INSERT INTO schema_migrations (version) VALUES ('20160402105324');
 
