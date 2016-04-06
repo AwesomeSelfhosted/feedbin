@@ -26,10 +26,10 @@ class Service
     entry = Entry.find(params[:entry_id])
     if params[:readability] == "on"
       url = entry.fully_qualified_url
-      content_info = Rails.cache.fetch("content_view:#{Digest::SHA1.hexdigest(url)}:v2") do
-        ReadabilityParser.parse(url)
+      content_info = Rails.cache.fetch("content_view:#{Digest::SHA1.hexdigest(url)}:v3") do
+        Instaparser.new(url).data
       end
-      content = content_info.content
+      content = content_info["html"]
     else
       content = entry.content
     end
