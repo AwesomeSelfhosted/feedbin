@@ -18,6 +18,7 @@ Feedbin::Application.routes.draw do
   post '/starred/export', to: 'starred_entries#export'
   get '/favicons/:hash', to: 'favicons#index', as: 'favicons'
 
+  # get    :parser,         to: 'site#parser'
   get    :signup,         to: 'users#new',           as: 'signup'
   get    :login,          to: 'sessions#new',        as: 'login'
   delete :logout,         to: 'sessions#destroy',    as: 'logout'

@@ -1,0 +1,30 @@
+<style type="text/css" media="screen">
+.box {
+  width: 660px;
+  float: left;
+}
+.content-styles {
+  border: 1px solid #dcdee0;
+  padding: 15px;
+}
+</style>
+
+<p><strong>URL:</strong> <%= @url %></p>
+
+<div class="test-wrap">
+  <div class="box">
+    Instaparser
+  </div>
+  <div class="box" style="margin-left: 20px;">
+    Readability
+  </div>
+</div>
+
+<div class="test-wrap">
+  <div class="box content-styles entry-type-default">
+    <%= @instaparser.html_safe %>
+  </div>
+  <div class="box content-styles entry-type-default" style="margin-left: 20px;">
+    <%= @readability.html_safe %>
+  </div>
+</div>

@@ -31,7 +31,7 @@ class Instaparser
 
   def request
     @request ||= begin
-      HTTP.timeout(:global, write: 2, connect: 2, read: 2).get(API_URL, params: {url: @url, api_key: ENV['INSTAPARSER_API_KEY']})
+      HTTP.timeout(:global, write: 5, connect: 5, read: 5).get(API_URL, params: {url: @url, api_key: ENV['INSTAPARSER_API_KEY']})
     end
   end
 end

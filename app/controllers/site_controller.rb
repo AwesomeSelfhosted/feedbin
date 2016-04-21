@@ -1,6 +1,6 @@
 class SiteController < ApplicationController
 
-  skip_before_action :authorize, only: [:index]
+  skip_before_action :authorize, only: [:index, :parser]
   before_action :check_user, if: :signed_in?
 
   def index
@@ -49,6 +49,23 @@ class SiteController < ApplicationController
   end
 
   private
+
+  def parser
+    id = $redis.incr("rtest5")
+
+    entry = Entry.find(id)
+    @url = entry.fully_qualified_url
+
+    instaparser = Rails.cache.fetch("instaparser:#{Digest::SHA1.hexdigest(@url)}") do
+      Instaparser.new(@url).data
+    end
+    @instaparser = instaparser["html"]
+
+    readability = Rails.cache.fetch("readability:#{Digest::SHA1.hexdigest(@url)}") do
+      ReadabilityParser.parse(@url)
+    end
+    @readability = readability.content
+  end
 
   def check_user
     if current_user.suspended
