@@ -262,7 +262,9 @@ CREATE TABLE entries (
     source text,
     image_url text,
     processed_image_url text,
-    image json
+    image json,
+    version integer,
+    storage_path text
 );
 
 
@@ -2050,4 +2052,6 @@ INSERT INTO schema_migrations (version) VALUES ('20151207224028');
 INSERT INTO schema_migrations (version) VALUES ('20160126003712');
 
 INSERT INTO schema_migrations (version) VALUES ('20160504184656');
+
+INSERT INTO schema_migrations (version) VALUES ('20160519194931');
 

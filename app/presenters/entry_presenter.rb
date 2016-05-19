@@ -43,7 +43,9 @@ class EntryPresenter < BasePresenter
   end
 
   def content(image_proxy_enabled)
-    ContentFormatter.format!(formatted_content, entry, image_proxy_enabled)
+    @content ||= begin
+      ContentFormatter.format!(formatted_content, entry, image_proxy_enabled)
+    end
   rescue => e
     Rails.logger.info { e.inspect }
     @template.content_tag(:p, '&ndash;&ndash;'.html_safe)
@@ -65,7 +67,7 @@ class EntryPresenter < BasePresenter
 
   def formatted_content
     @formatted_content ||= begin
-      formatted_content = entry.content
+      formatted_content = entry.real_content
       if text?
         formatted_content = ContentFormatter.text_email(formatted_content)
       elsif youtube?

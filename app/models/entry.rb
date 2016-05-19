@@ -9,6 +9,8 @@ class Entry < ActiveRecord::Base
   has_many :recently_read_entries
 
   before_create :ensure_published
+  before_create :upload
+  before_update :upload
   before_create :cache_public_id, unless: -> { Rails.env.test? }
   before_create :create_summary
   before_update :create_summary
@@ -52,6 +54,12 @@ class Entry < ActiveRecord::Base
       indexes :feed_id,   index: :not_analyzed, include_in_all: false
       indexes :published, type: 'date', include_in_all: false
       indexes :updated,   type: 'date', include_in_all: false
+    end
+  end
+
+  def real_content
+    $entry_data.with do |connection|
+      ActiveSupport::Gzip.decompress(connection.get("/#{storage_path}").to_s)
     end
   end
 
@@ -270,7 +278,29 @@ class Entry < ActiveRecord::Base
     self.data && self.data["format"] || "default"
   end
 
+  def upload
+    content_version = self.version || 0
+    content_version += 1
+    path = build_storage_path(content_version)
+    $entry_storage.with do |connection|
+      connection.put_object(ENV['AWS_ENTRIES_S3_BUCKET'], path, ActiveSupport::Gzip.compress(self.content), 'Content-Encoding' => 'gzip')
+    end
+    self.version = content_version
+    self.storage_path = path
+  end
+
   private
+
+  def build_storage_path(content_version)
+    "#{self.public_id[0..4]}/#{self.public_id}-#{content_version}2"
+  end
+
+  def content_version
+    content_version = self.version || 0
+    content_version += 1
+    self.version = content_version
+    content_version
+  end
 
   def base_url
     parent_feed = self.feed
