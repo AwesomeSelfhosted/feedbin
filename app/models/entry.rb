@@ -18,6 +18,7 @@ class Entry < ActiveRecord::Base
   after_commit :add_to_published_set, on: :create
   after_commit :increment_feed_stat, on: :create
   after_commit :touch_feed_last_published_entry, on: :create
+  after_commit :update_content, on: [:create, :update]
 
   tire_settings = {
     analysis: {
@@ -270,6 +271,12 @@ class Entry < ActiveRecord::Base
     self.data && self.data["format"] || "default"
   end
 
+  def add_content_info(content_path, content_length)
+    content_info_will_change!
+    content_length = 0 if !content_length
+    update_attributes content_info: content_info.push([content_path, content_length])
+  end
+
   private
 
   def base_url
@@ -343,6 +350,17 @@ class Entry < ActiveRecord::Base
 
   def find_images
     EntryImage.perform_async(self.id)
+  end
+
+  def update_content
+    if !saved_content_lengths.include?(self.content&.length)
+      EntryContent.perform_async(self.id)
+    end
+  end
+
+  def saved_content_lengths
+    saved = self.content_info || []
+    saved.map {|(_, length)| length.to_i}
   end
 
 end
