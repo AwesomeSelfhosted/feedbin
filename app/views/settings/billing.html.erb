@@ -35,7 +35,7 @@
           <ul class="control-group control-group-form">
           <% @plans.each do |plan| %>
             <li>
-              <% options = plan.stripe_id == 'basic-yearly-2' ? {checked: true, id: dom_id(plan)} : {id: dom_id(plan)} %>
+              <% options = plan.stripe_id =~ /yearly/ ? {checked: true, id: dom_id(plan)} : {id: dom_id(plan)} %>
               <%= f.radio_button :plan_id, plan.id, options %>
               <%= label_tag nil, for: dom_id(plan) do %>
                 <%= number_to_currency(plan.price, precision: 0) %>/<%= plan.name.gsub(/ly$/, '').downcase %>
