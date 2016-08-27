@@ -17,6 +17,7 @@ class SendToKindle
     begin
       content_path = write_html
       puts "content_path: #{content_path}"
+      system("cat #{content_path}")
       system("ls -al #{@working_directory}")
       mobi_path = kindlegen(content_path)
       system("ls -al #{@working_directory}")
@@ -32,7 +33,7 @@ class SendToKindle
 
   def kindlegen(content_path)
     mobi_file = 'kindle.mobi'
-    command = "#{ENV["KINDLEGEN_PATH"]} #{content_path} -o #{mobi_file} &> /dev/null"
+    command = "#{ENV["KINDLEGEN_PATH"]} #{content_path} -o #{mobi_file}"
     puts "command: #{command}"
     system(command)
     path = File.join(@working_directory, mobi_file)
