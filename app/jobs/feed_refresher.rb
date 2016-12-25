@@ -4,12 +4,9 @@ class FeedRefresher
   include BatchJobs
   include Sidekiq::Worker
 
-  attr_accessor :force_refresh
-
-  def perform(batch, priority_refresh, force_refresh = false)
-    @force_refresh = force_refresh
+  def perform(batch, count)
+    @count = count
     feed_ids = build_ids(batch)
-    count = priority_refresh ? 1 : 0
     jobs = build_arguments(feed_ids, count)
     if jobs.present?
       Sidekiq::Client.push_bulk(
@@ -21,16 +18,40 @@ class FeedRefresher
     end
   end
 
-  def build_arguments(feed_ids, count)
+  def _debug(feed_id)
+    @count = 0
+    Sidekiq::Client.push_bulk(
+      'args'  => build_arguments([feed_id]),
+      'class' => 'FeedRefresherFetcher',
+      'queue' => 'feed_refresher_fetcher_debug',
+      'retry' => false
+    )
+  end
+
+  private
+
+  def build_arguments(feed_ids)
     fields = [:id, :feed_url, :etag, :last_modified, :subscriptions_count, :push_expiration]
     subscriptions = Subscription.where(feed_id: feed_ids, active: true, muted: false).group(:feed_id).count
-    feeds = Feed.xml.where(id: feed_ids, active: true).where("subscriptions_count > ?", count).pluck(*fields)
+    feeds = Feed.xml.where(id: feed_ids, active: true).where("subscriptions_count > ?", subscriptions_count).pluck(*fields)
     feeds.each_with_object([]) do |result, array|
       feed = Hash[fields.zip(result)]
       if subscriptions.has_key?(feed[:id])
-        array << Arguments.new(feed, url_template, force_refresh).to_a
+        array << Arguments.new(feed, url_template, force_refresh?).to_a
       end
     end
+  end
+
+  def subscriptions_count
+    (priority?) ? 1 : 0
+  end
+
+  def priority?
+    @priority ||= @count % 2 == 0
+  end
+
+  def force_refresh?
+    @force_refresh ||= @count % 2 != 0 && @count % 3 == 0
   end
 
   def url_template
@@ -46,20 +67,10 @@ class FeedRefresher
     end
   end
 
-  def _debug(feed_id)
-    Sidekiq::Client.push_bulk(
-      'args'  => build_arguments([feed_id], 0),
-      'class' => 'FeedRefresherFetcher',
-      'queue' => 'feed_refresher_fetcher_debug',
-      'retry' => false
-    )
-  end
-
   class Arguments
     def initialize(feed, push_url, force_refresh = false)
       @feed = feed
       @push_url = push_url
-      @body = nil # only needed when receiving PuSH
       @force_refresh = force_refresh
     end
 
