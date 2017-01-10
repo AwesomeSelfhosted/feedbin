@@ -1,10 +1,10 @@
 <% content_for :head do %>
-  <%= javascript_include_tag "https://js.stripe.com/v1/" %>
+  <%= javascript_include_tag "https://js.stripe.com/v2/" %>
 <% end %>
 
 <div class="settings-content-inner">
   <div class="settings-outer">
-    <h2>Billing</h2>
+    <h2><%= (current_user.plan.trial?) ? "Subscribe" : "Billing" %></h2>
   </div>
 
 
@@ -24,28 +24,49 @@
           <%= hidden_field_tag :redirect_to, settings_billing_url %>
 
           <div class="inset-content">
-            <h4 class="group-header">Subscribe</h4>
+            <h4 class="group-header">Choose Your Plan</h4>
           </div>
-          <% if @user.stripe_token %>
-            <p>Credit card acceptance is pending.</p>
-          <% else %>
-            <%= render partial: 'shared/credit_card_form' %>
-          <% end %>
-
           <ul class="control-group control-group-form">
-          <% @plans.each do |plan| %>
+            <% @plans.each do |plan| %>
             <li>
               <% options = plan.stripe_id == 'basic-yearly-2' ? {checked: true, id: dom_id(plan)} : {id: dom_id(plan)} %>
               <%= f.radio_button :plan_id, plan.id, options %>
               <%= label_tag nil, for: dom_id(plan) do %>
-                <%= number_to_currency(plan.price, precision: 0) %>/<%= plan.name.gsub(/ly$/, '').downcase %>
+              <%= number_to_currency(plan.price, precision: 0) %>/<%= plan.name.gsub(/ly$/, '').downcase %>
               <% end %>
             </li>
-          <% end %>
+            <% end %>
           </ul>
 
+          <div data-behavior="payment_method">
+            <div class="inset-content">
+              <h4 class="group-header">Select Payment Method</h4>
+            </div>
+            <ul class="control-group control-group-form">
+              <li>
+                <%= radio_button_tag("billing_method", "apple_pay", true, { data: {behavior: 'billing_method_radio'}}) %>
+                <%= label_tag("billing_method_apple_pay", "Apple Pay") %>
+              </li>
+              <li>
+                <%= radio_button_tag("billing_method", "credit_card", false, { data: {behavior: 'billing_method_radio'}}) %>
+                <%= label_tag("billing_method_credit_card", "Credit Card") %>
+              </li>
+            </ul>
+          </div>
+
+          <div data-behavior="credit_card_details">
+            <div class="inset-content">
+              <h4 class="group-header">Credit Card Details</h4>
+            </div>
+            <% if @user.stripe_token %>
+              <p>Credit card acceptance is pending.</p>
+            <% else %>
+              <%= render partial: 'shared/credit_card_form' %>
+            <% end %>
+          </div>
+
           <div class="description-inset">
-            <%= f.submit "Subscribe", class: 'button-plain no-margin' %>
+            <%= f.submit "Subscribe", class: 'button-plain no-margin', disabled: "disabled" %>
           </div>
 
         <% end %>
