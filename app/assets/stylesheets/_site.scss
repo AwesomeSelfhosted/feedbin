@@ -5249,6 +5249,12 @@ Billing/Subscribe
 [data-behavior="payment_method"], [data-behavior="credit_card_details"] {
     display: none;
 }
+.apple-pay [data-behavior="payment_method"] {
+    display: block;
+}
+.no-apple-pay [data-behavior="credit_card_details"] {
+    display: block;
+}
 
 /*------------------------------------------------------------------------------
 Login and Sign Up
