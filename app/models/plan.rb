@@ -4,4 +4,9 @@ class Plan < ApplicationRecord
   def trial?
     self.stripe_id == "trial"
   end
+
+  def period
+    name.gsub(/ly$/, '').downcase
+  end
+
 end
