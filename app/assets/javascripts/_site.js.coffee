@@ -20,6 +20,14 @@ $.extend feedbin,
       messages.removeClass('show')
     ), timeout
 
+  applePayInit: (available) ->
+    className = "no-apple-pay"
+    if available
+        className = "apple-pay"
+        $('body').addClass('billing_method_apple_pay')
+    $("body").addClass(className)
+    $(".subscribe-target").removeAttr("disabled")
+
   previewHeight: ->
     container = $('[data-behavior~=preview_min_height]')
     preview = $('[data-behavior~=preview_container]')
@@ -955,6 +963,14 @@ $.extend feedbin,
         selected = $(@).attr('id')
         $('[data-behavior~=billing_help_text]').addClass('hide')
         $("[data-plan-id=#{selected}]").removeClass('hide')
+
+    billingMethodSelect: ->
+      $(document).on 'change', '[data-behavior~=billing_method_radio]', (event) ->
+        selected = $(@).attr('id')
+        $('[data-behavior~=billing_method_radio]').each ->
+          option = $(@).attr('id')
+          $('body').removeClass(option)
+        $('body').addClass(selected)
 
     checkBoxToggle: ->
       $(document).on 'change', '[data-behavior~=toggle_checked]', (event) ->

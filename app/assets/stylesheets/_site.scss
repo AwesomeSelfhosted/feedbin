@@ -5250,6 +5250,9 @@ Billing/Subscribe
 .no-apple-pay [data-behavior="credit_card_details"] {
     display: block;
 }
+.apple-pay.billing_method_credit_card [data-behavior="credit_card_details"] {
+    display: block;
+}
 
 /*------------------------------------------------------------------------------
 Login and Sign Up
