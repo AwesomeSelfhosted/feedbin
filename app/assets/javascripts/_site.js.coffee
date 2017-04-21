@@ -21,6 +21,7 @@ $.extend feedbin,
     ), timeout
 
   applePayInit: (available) ->
+    feedbin.applePay = available
     className = "no-apple-pay"
     if available
         className = "apple-pay"
@@ -599,6 +600,8 @@ $.extend feedbin,
 
 
   entries: {}
+
+  applePay: false
 
   feedCandidates: []
 

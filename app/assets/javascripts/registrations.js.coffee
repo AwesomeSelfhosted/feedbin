@@ -17,11 +17,38 @@ class feedbin.Registration
     $(document).on 'submit', '[data-behavior~=credit_card_form]', (event) =>
       $('[data-behavior~=stripe_error]').addClass('hide')
       $('input[type=submit]').attr('disabled', true)
-      if $('#card_number').length
+      if feedbin.applePay && @applePaySelected()
+        @processApplePay()
+        event.preventDefault()
+      else if $('#card_number').length
         @processCard()
         event.preventDefault()
       else
         true
+
+  applePaySelected: ->
+    $('input[name=billing_method]').val() == "apple_pay"
+
+  processApplePay: ->
+    plan = $('input[name="user[plan_id]"]:checked').data()
+    paymentRequest =
+      countryCode: 'US'
+      currencyCode: 'USD'
+      total:
+        label: "Feedbin #{plan.name} Subscription"
+        amount: plan.amount
+
+    console.log paymentRequest
+
+    session = Stripe.applePay.buildSession paymentRequest, (result, completion) ->
+      console.log result
+      console.log completion
+
+    session.oncancel = ->
+      console.log 'cancel'
+
+    session.begin()
+
 
   processCard: ->
     expiration = $('#card_expiration').payment('cardExpiryVal')

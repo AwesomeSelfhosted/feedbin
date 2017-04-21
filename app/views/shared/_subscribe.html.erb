@@ -18,7 +18,14 @@
             <% @plans.each do |plan| %>
             <li>
                 <%
-                options = { id: dom_id(plan), data: {behavior: "plan_select"} }
+                options = {
+                    id: dom_id(plan),
+                    data: {
+                        name: plan.name,
+                        amount: number_to_currency(plan.price, unit: ""),
+                        behavior: "plan_select"
+                    }
+                }
                 options[:checked] = true if plan == @default_plan
                 %>
                 <%= f.radio_button :plan_id, plan.id, options %>
