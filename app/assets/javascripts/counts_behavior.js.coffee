@@ -66,6 +66,7 @@ class feedbin.CountsBehavior
   constructor: ->
     feedbin.applyCounts(false)
     $(document).on('feedbin:entriesLoaded', @applyState)
+    $(document).on('feedbin:entryLoaded', @setupContent)
     $(document).on('click', '[data-behavior~=change_view_mode]', @changeViewMode)
     $(document).on('click', '[data-behavior~=show_entries]', @showEntries)
     $(document).on('ajax:beforeSend', '[data-behavior~=show_entry_content]', @showEntryContent)
@@ -97,41 +98,31 @@ class feedbin.CountsBehavior
       feedbin.openFirstItem = false
 
   showEntryContent: (event, xhr) =>
-    container = $(event.currentTarget)
-    entry = $(container).data('entry-info')
+    feedbin.nextEntry = $(event.currentTarget)
+    entry = $(feedbin.nextEntry).data('entry-id')
 
-    feedbin.selectedEntry =
-      id: entry.id
-      feed_id: entry.feed_id
-      container: container
-
-    if entry.id of feedbin.entries
+    if entry of feedbin.entries
       xhr.abort()
-      feedbin.showEntry(entry.id)
+      feedbin.showEntry(entry)
 
     clearTimeout feedbin.recentlyReadTimer
 
+  setupContent: =>
     markedRead = false
-    if !@isRead(entry.id)
+    if !@isRead(feedbin.selectedEntry.id)
       markedRead = true
-      $.post($(container).data('mark-as-read-path')).fail((result)->
-        if result.status == 422
-          feedbin.refreshRetry(@)
-      )
-      feedbin.Counts.get().removeEntry(entry.id, entry.feed_id, 'unread')
+      $.post(feedbin.selectedEntry.mark_as_read_path)
+      feedbin.Counts.get().removeEntry(feedbin.selectedEntry.id, feedbin.selectedEntry.feed_id, 'unread')
       @mark('read')
       feedbin.recentlyReadTimer = setTimeout ( ->
-        $.post($(container).data('recently-read-path')).fail((result)->
-          if result.status == 422
-            feedbin.refreshRetry(@)
-        )
+        $.post(feedbin.selectedEntry.recently_read_path)
       ), 10000
 
-    if @isUpdated(entry.id)
+    if @isUpdated(feedbin.selectedEntry.id)
       feedbin.Counts.get().removeEntry(entry.id, entry.feed_id, 'updated')
       @mark('read')
       if !markedRead
-        $.post $(container).data('mark-as-read-path')
+        $.post feedbin.selectedEntry.mark_as_read_path
 
   isRead: (entryId) ->
     feedbin.Counts.get().isRead(entryId)

@@ -73,6 +73,10 @@ class EntriesController < ApplicationController
     @entries = entries_by_id(params[:id])
     respond_to do |format|
       format.js
+      format.html do
+        site_setup
+        render 'site/logged_in'
+      end
     end
   end
 

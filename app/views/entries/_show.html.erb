@@ -66,5 +66,14 @@
     <% end %>
     <script type="text/javascript">
       $('[data-basement-panel-target~=feed_panel]').html('<%= j render partial: "shared/feed_settings", locals: { entry: entry } %>');
+      feedbin.selectedEntry = {
+        id: <%= entry.id %>,
+        feed_id: <%= entry.feed_id %>,
+        published: <%= entry.published.to_i %>,
+        mark_as_read_path: "/entries/<%= entry.id %>/mark_as_read",
+        recently_read_path: "/entries/<%= entry.id %>/recently_read"
+      }
+      feedbin.formatEntryContent(<%= entry.id %>, true);
+      $(document).trigger('feedbin:entryLoaded');
     </script>
 <% end %>

@@ -1880,10 +1880,10 @@ $saved-search-control-height: 48px;
     position: absolute;
     top: 0;
     left: 0;
-    z-index: 3;
     width: 100%;
     height: $toolbar-height;
     border-bottom: 1px solid transparent;
+    z-index: 101;
     @include background-color($body-background-color, $body-background-color-night, $body-background-color-sunset);
     @include border-color($border-color, $border-color-night, $border-color-sunset);
     .site-info {

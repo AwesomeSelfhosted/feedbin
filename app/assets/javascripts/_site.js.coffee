@@ -310,13 +310,16 @@ $.extend feedbin,
       null
 
   nextEntryPreview: () ->
-    next = feedbin.selectedEntry.container.parents('li').next()
-    if next.length
-      title = next.find('.title').text()
-      feed = next.find('.feed-title').text()
-      $('.next-entry-title').text(title)
-      $('.next-entry-feed').text(feed)
-      $('.next-entry-preview').removeClass('no-content')
+    if feedbin.nextEntry
+      next = feedbin.nextEntry.parents('li').next()
+      if next.length
+        title = next.find('.title').text()
+        feed = next.find('.feed-title').text()
+        $('.next-entry-title').text(title)
+        $('.next-entry-feed').text(feed)
+        $('.next-entry-preview').removeClass('no-content')
+      else
+        $('.next-entry-preview').addClass('no-content')
     else
       $('.next-entry-preview').addClass('no-content')
 
@@ -507,7 +510,7 @@ $.extend feedbin,
   showEntry: (entryId) ->
     entry = feedbin.entries[entryId]
     feedbin.updateEntryContent(entry.content)
-    feedbin.formatEntryContent(entryId, true)
+
 
   tagFeed: (url, tag, noResponse = true) ->
     $.ajax
